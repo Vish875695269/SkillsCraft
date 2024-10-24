@@ -1,0 +1,57 @@
+from cryptography.fernet import Fernet
+from PIL import Image
+import io
+
+# Step 1: Generate a key for encryption
+def generate_key():
+    key = Fernet.generate_key()
+    with open("secret.key", "wb") as key_file:
+        key_file.write(key)
+    return key
+
+# Step 2: Load the key
+def load_key():
+    return open("secret.key", "rb").read()
+
+# Step 3: Encrypt the image
+def encrypt_image(image_path, key):
+    # Load image and convert to bytes
+    with open(image_path, "rb") as image_file:
+        image_data = image_file.read()
+
+    # Encrypt the image bytes
+    fernet = Fernet(key)
+    encrypted_data = fernet.encrypt(image_data)
+
+    # Save encrypted image
+    with open("encrypted_image.enc", "wb") as encrypted_file:
+        encrypted_file.write(encrypted_data)
+
+    print("Image encrypted and saved as encrypted_image.enc")
+
+# Step 4: Decrypt the image
+def decrypt_image(encrypted_image_path, key):
+    # Load encrypted image
+    with open(encrypted_image_path, "rb") as encrypted_file:
+        encrypted_data = encrypted_file.read()
+
+    # Decrypt the image bytes
+    fernet = Fernet(key)
+    decrypted_data = fernet.decrypt(encrypted_data)
+
+    # Save the decrypted image
+    image = Image.open(io.BytesIO(decrypted_data))
+    image.save("decrypted_image.png")
+
+    print("Image decrypted and saved as decrypted_image.png")
+
+# Example Usage
+if __name__ == "__main__":
+    # Generate and load key
+    key = generate_key()
+
+    # Encrypt the image
+    encrypt_image("example_image.png", key)
+
+    # Decrypt the image
+    decrypt_image("encrypted_image.enc", key)
